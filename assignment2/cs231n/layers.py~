@@ -561,8 +561,8 @@ def max_pool_backward_naive(dout, cache):
 
     for i, (x_sample, dout_sample) in enumerate(zip(x, dout)):
         for j, (x_channel, dout_channel) in enumerate(zip(x_sample, dout_sample)):
-            for vert in range(H / pool_height):
-                for horiz in range(W / pool_width):
+            for vert in range(pool_height):
+                for horiz in range(pool_width):
                     max_pos = np.argmax(x[i, j, vert * stride : (vert + 1) * stride,
                         horiz * stride : (horiz + 1) * stride])
                     new_subsample = np.zeros((stride, stride)).flatten()

@@ -283,7 +283,7 @@ class FullyConnectedNet(object):
                         self.params['W' + str(i)],
                         self.params['b' + str(i)])
             else:
-                a[i], relu_cache[i] = affine_relu_forward(a[i - 1], 
+                a[i], relu_cache[i] = affine_relu_forward(dropout[i - 1], 
                         self.params['W' + str(i)],
                         self.params['b' + str(i)])
         else:
@@ -295,14 +295,16 @@ class FullyConnectedNet(object):
                         self.params['beta1'],
                         self.bn_params[0])
             else:
-                a[i], relu_cache[i] = affine_bn_relu_forward(a[i - 1],
+                a[i], relu_cache[i] = affine_bn_relu_forward(dropout[i - 1],
                         self.params['W' + str(i)],
                         self.params['b' + str(i)],
                         self.params['gamma' + str(i)],
                         self.params['beta' + str(i)],
                         self.bn_params[i - 1])
         if self.use_dropout:
-            a[i], dropout_cache[i] = dropout_forward(a[i], self.dropout_param)
+            dropout[i], dropout_cache[i] = dropout_forward(a[i], self.dropout_param)
+        else:
+            dropout[i] = a[i]
 
     z, z_cache = affine_forward(a[i], 
             self.params['W' + str(i + 1)],
@@ -350,7 +352,7 @@ class FullyConnectedNet(object):
 
     for i in range(self.num_layers - 1, 0, -1):
         if self.use_dropout:
-            dx = dropout_backward(dx, dropout_cache[i])
+            dx = dropout_backward(dx, dropout_cache[i - 1])
         if self.use_batchnorm == False:
             dx, dw, db = affine_relu_backward(dx, relu_cache[i])
             grads['W' + str(i)] = dw + self.reg * self.params['W' + str(i)]
