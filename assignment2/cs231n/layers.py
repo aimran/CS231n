@@ -579,42 +579,42 @@ def max_pool_backward_naive(dout, cache):
 
 
 def spatial_batchnorm_forward(x, gamma, beta, bn_param):
-  """
-  Computes the forward pass for spatial batch normalization.
-  
-  Inputs:
-  - x: Input data of shape (N, C, H, W)
-  - gamma: Scale parameter, of shape (C,)
-  - beta: Shift parameter, of shape (C,)
-  - bn_param: Dictionary with the following keys:
-    - mode: 'train' or 'test'; required
-    - eps: Constant for numeric stability
-    - momentum: Constant for running mean / variance. momentum=0 means that
-      old information is discarded completely at every time step, while
-      momentum=1 means that new information is never incorporated. The
-      default of momentum=0.9 should work well in most situations.
-    - running_mean: Array of shape (D,) giving running mean of features
-    - running_var Array of shape (D,) giving running variance of features
+    """
+    Computes the forward pass for spatial batch normalization.
     
-  Returns a tuple of:
-  - out: Output data, of shape (N, C, H, W)
-  - cache: Values needed for the backward pass
-  """
-  out, cache = None, None
+    Inputs:
+    - x: Input data of shape (N, C, H, W)
+    - gamma: Scale parameter, of shape (C,)
+    - beta: Shift parameter, of shape (C,)
+    - bn_param: Dictionary with the following keys:
+      - mode: 'train' or 'test'; required
+      - eps: Constant for numeric stability
+      - momentum: Constant for running mean / variance. momentum=0 means that
+        old information is discarded completely at every time step, while
+        momentum=1 means that new information is never incorporated. The
+        default of momentum=0.9 should work well in most situations.
+      - running_mean: Array of shape (D,) giving running mean of features
+      - running_var Array of shape (D,) giving running variance of features
+      
+    Returns a tuple of:
+    - out: Output data, of shape (N, C, H, W)
+    - cache: Values needed for the backward pass
+    """
+    out, cache = None, None
 
-  #############################################################################
-  # TODO: Implement the forward pass for spatial batch normalization.         #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+    #############################################################################
+    # TODO: Implement the forward pass for spatial batch normalization.         #
+    #                                                                           #
+    # HINT: You can implement spatial batch normalization using the vanilla     #
+    # version of batch normalization defined above. Your implementation should  #
+    # be very short; ours is less than five lines.                              #
+    #############################################################################
+    pass
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
 
-  return out, cache
+    return out, cache
 
 
 def spatial_batchnorm_backward(dout, cache):
