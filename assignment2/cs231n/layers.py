@@ -347,7 +347,7 @@ def dropout_forward(x, dropout_param):
     # TODO: Implement the test phase forward pass for inverted dropout.       #
     ###########################################################################
     
-    out = x
+    out = x * (1 - p)
 
     ###########################################################################
     #                            END OF YOUR CODE                             #
@@ -609,7 +609,13 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should  #
     # be very short; ours is less than five lines.                              #
     #############################################################################
-    pass
+    
+    N, C, H, W = x.shape
+    x_T = x.transpose((0, 2, 3, 1))
+    x_flat = x_T.reshape(-1, C)
+    out, cache = batchnorm_forward(x_flat, gamma, beta, bn_param)
+    out = out.reshape((N, H, W, C)).transpose(0, 3, 1, 2)
+
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -618,33 +624,39 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
 
 
 def spatial_batchnorm_backward(dout, cache):
-  """
-  Computes the backward pass for spatial batch normalization.
-  
-  Inputs:
-  - dout: Upstream derivatives, of shape (N, C, H, W)
-  - cache: Values from the forward pass
-  
-  Returns a tuple of:
-  - dx: Gradient with respect to inputs, of shape (N, C, H, W)
-  - dgamma: Gradient with respect to scale parameter, of shape (C,)
-  - dbeta: Gradient with respect to shift parameter, of shape (C,)
-  """
-  dx, dgamma, dbeta = None, None, None
+    """
+    Computes the backward pass for spatial batch normalization.
+    
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, C, H, W)
+    - cache: Values from the forward pass
+    
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs, of shape (N, C, H, W)
+    - dgamma: Gradient with respect to scale parameter, of shape (C,)
+    - dbeta: Gradient with respect to shift parameter, of shape (C,)
+    """
+    dx, dgamma, dbeta = None, None, None
 
-  #############################################################################
-  # TODO: Implement the backward pass for spatial batch normalization.        #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+    #############################################################################
+    # TODO: Implement the backward pass for spatial batch normalization.        #
+    #                                                                           #
+    # HINT: You can implement spatial batch normalization using the vanilla     #
+    # version of batch normalization defined above. Your implementation should  #
+    # be very short; ours is less than five lines.                              #
+    #############################################################################
+    
+    N, C, H, W = dout.shape
+    dout_T = dout.transpose(0, 2, 3, 1)
+    dout_flat = dout_T.reshape(-1, C)
+    dx, dgamma, dbeta = batchnorm_backward_alt(dout_flat, cache)
+    dx = dx.reshape((N, H, W, C)).transpose((0, 3, 1, 2))
 
-  return dx, dgamma, dbeta
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
+
+    return dx, dgamma, dbeta
   
 
 def svm_loss(x, y):
