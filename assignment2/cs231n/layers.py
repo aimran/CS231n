@@ -609,7 +609,16 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should  #
     # be very short; ours is less than five lines.                              #
     #############################################################################
-    pass
+    
+    N, C, H, W = x.shape
+    out = np.zeros(x.shape)
+    cache = {}
+
+    for channel in range(C):
+        bn_out, cache[channel] = batchnorm_forward(x[:, channel, :, :].reshape((N, H * W)),
+                                             gamma[channel], beta[channel],
+                                             bn_param)
+        out[:, channel, :, :] = bn_out.reshape((N, H, W))
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -618,33 +627,44 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
 
 
 def spatial_batchnorm_backward(dout, cache):
-  """
-  Computes the backward pass for spatial batch normalization.
-  
-  Inputs:
-  - dout: Upstream derivatives, of shape (N, C, H, W)
-  - cache: Values from the forward pass
-  
-  Returns a tuple of:
-  - dx: Gradient with respect to inputs, of shape (N, C, H, W)
-  - dgamma: Gradient with respect to scale parameter, of shape (C,)
-  - dbeta: Gradient with respect to shift parameter, of shape (C,)
-  """
-  dx, dgamma, dbeta = None, None, None
+    """
+    Computes the backward pass for spatial batch normalization.
+    
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, C, H, W)
+    - cache: Values from the forward pass
+    
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs, of shape (N, C, H, W)
+    - dgamma: Gradient with respect to scale parameter, of shape (C,)
+    - dbeta: Gradient with respect to shift parameter, of shape (C,)
+    """
+    dx, dgamma, dbeta = None, None, None
 
-  #############################################################################
-  # TODO: Implement the backward pass for spatial batch normalization.        #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+    #############################################################################
+    # TODO: Implement the backward pass for spatial batch normalization.        #
+    #                                                                           #
+    # HINT: You can implement spatial batch normalization using the vanilla     #
+    # version of batch normalization defined above. Your implementation should  #
+    # be very short; ours is less than five lines.                              #
+    #############################################################################
+    
+    dx = np.zeros(dout.shape)
+    N, C, H, W = dout.shape
+    dgamma = np.zeros(C)
+    dbeta = np.zeros(C)
 
-  return dx, dgamma, dbeta
+    for channel in range(C):
+        dx_sample, dg, db = batchnorm_backward_alt( \
+                dout[:, channel, :, :].reshape((N, H * W)), cache[channel])
+        dx[:, channel, :, :] = dx_sample.reshape((N, H, W))
+        dgamma[channel] = np.sum(dg)
+        dbeta[channel] = np.sum(db)
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
+
+    return dx, dgamma, dbeta
   
 
 def svm_loss(x, y):
