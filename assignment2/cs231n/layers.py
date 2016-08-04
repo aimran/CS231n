@@ -305,58 +305,58 @@ def batchnorm_backward_alt(dout, cache):
 
 
 def dropout_forward(x, dropout_param):
-  """
-  Performs the forward pass for (inverted) dropout.
+    """
+    Performs the forward pass for (inverted) dropout.
 
-  Inputs:
-  - x: Input data, of any shape
-  - dropout_param: A dictionary with the following keys:
-    - p: Dropout parameter. We drop each neuron output with probability p.
-    - mode: 'test' or 'train'. If the mode is train, then perform dropout;
-      if the mode is test, then just return the input.
-    - seed: Seed for the random number generator. Passing seed makes this
-      function deterministic, which is needed for gradient checking but not in
-      real networks.
+    Inputs:
+    - x: Input data, of any shape
+    - dropout_param: A dictionary with the following keys:
+        - p: Dropout parameter. We drop each neuron output with probability p.
+        - mode: 'test' or 'train'. If the mode is train, then perform dropout;
+          if the mode is test, then just return the input.
+        - seed: Seed for the random number generator. Passing seed makes this
+          function deterministic, which is needed for gradient checking but not in
+          real networks.
 
-  Outputs:
-  - out: Array of the same shape as x.
-  - cache: A tuple (dropout_param, mask). In training mode, mask is the dropout
-    mask that was used to multiply the input; in test mode, mask is None.
-  """
-  p, mode = dropout_param['p'], dropout_param['mode']
-  if 'seed' in dropout_param:
-    np.random.seed(dropout_param['seed'])
+    Outputs:
+    - out: Array of the same shape as x.
+    - cache: A tuple (dropout_param, mask). In training mode, mask is the dropout
+      mask that was used to multiply the input; in test mode, mask is None.
+    """
+    p, mode = dropout_param['p'], dropout_param['mode']
+    if 'seed' in dropout_param:
+        np.random.seed(dropout_param['seed'])
 
-  mask = None
-  out = None
+    mask = None
+    out = None
 
-  if mode == 'train':
-    ###########################################################################
-    # TODO: Implement the training phase forward pass for inverted dropout.   #
-    # Store the dropout mask in the mask variable.                            #
-    ###########################################################################
-    
-    mask = np.random.choice([0, 1], size=x.shape,
-            replace=True, p=[p, 1-p])
-    out = x * mask
-    ###########################################################################
-    #                            END OF YOUR CODE                             #
-    ###########################################################################
-  elif mode == 'test':
-    ###########################################################################
-    # TODO: Implement the test phase forward pass for inverted dropout.       #
-    ###########################################################################
-    
-    out = x
+    if mode == 'train':
+        ###########################################################################
+        # TODO: Implement the training phase forward pass for inverted dropout.   #
+        # Store the dropout mask in the mask variable.                            #
+        ###########################################################################
+        
+        mask = np.random.choice([0, 1], size=x.shape,
+                replace=True, p=[p, 1-p])
+        out = x * mask
+        ###########################################################################
+        #                            END OF YOUR CODE                             #
+        ###########################################################################
+    elif mode == 'test':
+        ###########################################################################
+        # TODO: Implement the test phase forward pass for inverted dropout.       #
+        ###########################################################################
+        
+        out = x * (1 - p)
 
-    ###########################################################################
-    #                            END OF YOUR CODE                             #
-    ###########################################################################
+        ###########################################################################
+        #                            END OF YOUR CODE                             #
+        ###########################################################################
 
-  cache = (dropout_param, mask)
-  out = out.astype(x.dtype, copy=False)
+    cache = (dropout_param, mask)
+    out = out.astype(x.dtype, copy=False)
 
-  return out, cache
+    return out, cache
 
 
 def dropout_backward(dout, cache):
@@ -382,7 +382,7 @@ def dropout_backward(dout, cache):
     #                            END OF YOUR CODE                             #
     ###########################################################################
   elif mode == 'test':
-    dx = dout
+    dx = dout * (1 - p)
   return dx
 
 
@@ -609,7 +609,11 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
     # version of batch normalization defined above. Your implementation should  #
     # be very short; ours is less than five lines.                              #
     #############################################################################
-    pass
+    N, C, H, W = x.shape
+    x_T = x.transpose(0, 2, 3, 1)
+    x_flat = x_T.reshape(-1, C)
+    out, cache = batchnorm_forward(x_flat, gamma, beta, bn_param)
+    out = out.reshape(N, H, W, C).transpose(0, 3, 1, 2)
     #############################################################################
     #                             END OF YOUR CODE                              #
     #############################################################################
@@ -618,33 +622,37 @@ def spatial_batchnorm_forward(x, gamma, beta, bn_param):
 
 
 def spatial_batchnorm_backward(dout, cache):
-  """
-  Computes the backward pass for spatial batch normalization.
-  
-  Inputs:
-  - dout: Upstream derivatives, of shape (N, C, H, W)
-  - cache: Values from the forward pass
-  
-  Returns a tuple of:
-  - dx: Gradient with respect to inputs, of shape (N, C, H, W)
-  - dgamma: Gradient with respect to scale parameter, of shape (C,)
-  - dbeta: Gradient with respect to shift parameter, of shape (C,)
-  """
-  dx, dgamma, dbeta = None, None, None
+    """
+    Computes the backward pass for spatial batch normalization.
+    
+    Inputs:
+    - dout: Upstream derivatives, of shape (N, C, H, W)
+    - cache: Values from the forward pass
+    
+    Returns a tuple of:
+    - dx: Gradient with respect to inputs, of shape (N, C, H, W)
+    - dgamma: Gradient with respect to scale parameter, of shape (C,)
+    - dbeta: Gradient with respect to shift parameter, of shape (C,)
+    """
+    dx, dgamma, dbeta = None, None, None
 
-  #############################################################################
-  # TODO: Implement the backward pass for spatial batch normalization.        #
-  #                                                                           #
-  # HINT: You can implement spatial batch normalization using the vanilla     #
-  # version of batch normalization defined above. Your implementation should  #
-  # be very short; ours is less than five lines.                              #
-  #############################################################################
-  pass
-  #############################################################################
-  #                             END OF YOUR CODE                              #
-  #############################################################################
+    #############################################################################
+    # TODO: Implement the backward pass for spatial batch normalization.        #
+    #                                                                           #
+    # HINT: You can implement spatial batch normalization using the vanilla     #
+    # version of batch normalization defined above. Your implementation should  #
+    # be very short; ours is less than five lines.                              #
+    #############################################################################
+    N, C, H, W = dout.shape
+    dout_T = dout.transpose((0, 2, 3, 1))
+    dout_flat = dout_T.reshape((-1, C))
+    dx, dgamma, dbeta = batchnorm_backward_alt(dout_flat, cache)
+    dx = dx.reshape((N, H, W, C)).transpose((0, 3, 1, 2))
+    #############################################################################
+    #                             END OF YOUR CODE                              #
+    #############################################################################
 
-  return dx, dgamma, dbeta
+    return dx, dgamma, dbeta
   
 
 def svm_loss(x, y):

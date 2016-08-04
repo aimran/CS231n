@@ -29,10 +29,6 @@ def affine_relu_backward(dout, cache):
   dx, dw, db = affine_backward(da, fc_cache)
   return dx, dw, db
 
-
-pass
-
-
 def conv_relu_forward(x, w, b, conv_param):
   """
   A convenience layer that performs a convolution followed by a ReLU.
@@ -91,3 +87,23 @@ def conv_relu_pool_backward(dout, cache):
   dx, dw, db = conv_backward_fast(da, conv_cache)
   return dx, dw, db
 
+def conv_bn_relu_pool_forward(x, w, b, gamma, beta, conv_param, pool_param, bn_param):
+    conv, conv_cache = conv_forward_fast(x, w, b, conv_param)
+    bn, bn_cache = spatial_batchnorm_forward(conv, gamma, beta, bn_param)
+    relu, relu_cache = relu_forward(bn)
+    pool, pool_cache = max_pool_forward_fast(relu, pool_param)
+
+    cache = [conv_cache, bn_cache, relu_cache, pool_cache]
+    out = pool
+
+    return out, cache
+
+def conv_bn_relu_pool_backward(dout, cache):
+    conv_cache, bn_cache, relu_cache, pool_cache = cache
+
+    dpool = max_pool_backward_fast(dout, pool_cache)
+    drelu = relu_backward(dpool, relu_cache)
+    dbn, dgamma, dbeta = spatial_batchnorm_backward(drelu, bn_cache)
+    dx, dw, db = conv_backward_fast(dbn, conv_cache)
+
+    return dx, dw, db, dgamma, dbeta

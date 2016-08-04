@@ -227,7 +227,7 @@ class Solver(object):
       self._step()
 
       # Maybe print training loss
-      if self.verbose and t % self.print_every == 0:
+      if self.verbose and t % self.print_every == 0 and self.print_every != -1:
         print '(Iteration %d / %d) loss: %f' % (
                t + 1, num_iterations, self.loss_history[-1])
 
