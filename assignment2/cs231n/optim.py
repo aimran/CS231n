@@ -155,7 +155,21 @@ def adam(x, dx, config=None):
     
     return next_x, config
 
-  
-  
-  
+def adagrad(x, dx, config=None):
+    """
+    Uses the Adagrad update rule, which is a per parameter update
+    """
+    if config is None: config = {}
+    config.setdefault('learning_rate', 1e-2)
+    config.setdefault('epsilon', 1e-8)
+    config.setdefault('sum_squared_grad', np.zeros(dx.shape))
 
+    config['sum_squared_grad'] += dx ** 2
+    
+    learning_rate, epsilon = config['learning_rate'], config['epsilon']
+    sum_squared_grad = config['sum_squared_grad']
+
+    next_x = x - learning_rate / np.sqrt(sum_squared_grad + epsilon) * dx
+
+    return next_x, config
+    
