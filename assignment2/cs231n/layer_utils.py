@@ -2,7 +2,7 @@ from cs231n.layers import *
 from cs231n.fast_layers import *
 
 
-def affine_relu_forward(x, w, b):
+def affine_relu_forward(x, w, b, leakiness):
   """
   Convenience layer that perorms an affine transform followed by a ReLU
 
@@ -15,7 +15,7 @@ def affine_relu_forward(x, w, b):
   - cache: Object to give to the backward pass
   """
   a, fc_cache = affine_forward(x, w, b)
-  out, relu_cache = relu_forward(a)
+  out, relu_cache = relu_forward(a, leakiness)
   cache = (fc_cache, relu_cache)
   return out, cache
 
@@ -103,6 +103,25 @@ def conv_bn_relu_pool_backward(dout, cache):
 
     dpool = max_pool_backward_fast(dout, pool_cache)
     drelu = relu_backward(dpool, relu_cache)
+    dbn, dgamma, dbeta = spatial_batchnorm_backward(drelu, bn_cache)
+    dx, dw, db = conv_backward_fast(dbn, conv_cache)
+
+    return dx, dw, db, dgamma, dbeta
+
+def conv_bn_relu_forward(x, w, b, gamma, beta, leakiness, conv_param, bn_param):
+    conv, conv_cache = conv_forward_fast(x, w, b, conv_param)
+    bn, bn_cache = spatial_batchnorm_forward(conv, gamma, beta, bn_param)
+    relu, relu_cache = relu_forward(bn, leakiness)
+
+    cache = [conv_cache, bn_cache, relu_cache]
+    out = relu
+
+    return out, cache
+
+def conv_bn_relu_backward(dout, cache):
+    conv_cache, bn_cache, relu_cache = cache
+
+    drelu = relu_backward(dout, relu_cache)
     dbn, dgamma, dbeta = spatial_batchnorm_backward(drelu, bn_cache)
     dx, dw, db = conv_backward_fast(dbn, conv_cache)
 

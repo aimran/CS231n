@@ -66,7 +66,7 @@ def affine_backward(dout, cache):
     return dx, dw, db
 
 
-def relu_forward(x):
+def relu_forward(x, leakiness=0):
   """
   Computes the forward pass for a layer of rectified linear units (ReLUs).
 
@@ -81,11 +81,11 @@ def relu_forward(x):
   #############################################################################
   # TODO: Implement the ReLU forward pass.                                    #
   #############################################################################
-  out = x * (x > 0)
+  out = x * ((x > 0) + leakiness * (x < 0))
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################
-  cache = x
+  cache = (x, leakiness)
   return out, cache
 
 
@@ -100,11 +100,11 @@ def relu_backward(dout, cache):
   Returns:
   - dx: Gradient with respect to x
   """
-  dx, x = None, cache
+  dx, (x, leakiness) = None, cache
   #############################################################################
   # TODO: Implement the ReLU backward pass.                                   #
   #############################################################################
-  dx = dout * (x > 0)
+  dx = dout * ((x > 0) + leakiness * (x < 0))
   #############################################################################
   #                             END OF YOUR CODE                              #
   #############################################################################

@@ -173,3 +173,25 @@ def adagrad(x, dx, config=None):
 
     return next_x, config
     
+def adadelta(x, dx, config=None):
+    """ AdaDelta optimizer implementation """
+    if config is None:
+        config = {}
+    config.setdefault('rho', 0.9)
+    config.setdefault('epsilon', 1e-8)
+    config.setdefault('exp_g_squared', 0)
+    config.setdefault('exp_dx_squared', 0)
+
+    exp_g_squared = config['exp_g_squared']
+    exp_dx_squared = config['exp_dx_squared']
+    rho, epsilon = config['rho'], config['epsilon']
+
+    exp_g_squared = rho * exp_g_squared + (1 - rho) * dx ** 2
+
+    dx = - np.sqrt(exp_dx_squared + epsilon) / np.sqrt(exp_g_squared + epsilon) * dx
+
+    exp_x_squared = rho * exp_dx_squared + (1 - rho) * dx ** 2
+
+    next_x = x + dx
+
+    return next_x, config
